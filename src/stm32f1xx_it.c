@@ -56,6 +56,7 @@
 #include "usbd_cdc_interface.h"
 #include "stm32f1xx_it.h"
 #include "max44009.h"
+#include "time.h"
 
 /** @addtogroup Validation_Project
   * @{
@@ -220,9 +221,9 @@ void USARTx_IRQHandler(void)
   * @param  None
   * @retval None
   */
-void TIMx_IRQHandler(void)
+void TIM3_IRQHandler(void)
 {
-  HAL_TIM_IRQHandler(&TimHandle);
+    USBD_CDC_TIM_IRQHandler();
 }
 
 
@@ -245,6 +246,15 @@ void EXTI0_IRQHandler(void)
     HAL_GPIO_EXTI_IRQHandler(MAX44009_INT_PIN);
 }
 
+/**
+  * @brief  This function handles TIM interrupt request.
+  * @param  None
+  * @retval None
+  */
+void TIM2_IRQHandler(void)
+{
+    TIME_IRQHandler();
+}
 
 /**
   * @}

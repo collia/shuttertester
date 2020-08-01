@@ -5,7 +5,7 @@
 #include "usbd_cdc.h"
 
 typedef void (*TERM_tx_handler)(const uint8_t* buff, uint32_t len);
-typedef int (*TERM_rx_handler)(const uint8_t* buff, uint32_t max_len);
+typedef int (*TERM_rx_handler)(uint8_t* buff, uint32_t max_len);
 
 void TERM_init(TERM_tx_handler tx_handler, TERM_rx_handler rx_handler);
 void TERM_deinit(void);

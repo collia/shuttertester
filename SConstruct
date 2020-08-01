@@ -114,9 +114,11 @@ prg = env.Program(
     source = [
         'build/src/main.c',
         'build/src/board.c',
+        'build/src/time.c',
         'build/src/i2c.c',
         'build/src/max44009.c',
         'build/src/terminal.c',
+        'build/src/shuttest.c',
         'build/src/shuttest_terminal.c',
         'build/src/stm32f1xx_it.c',
         'build/src/system_stm32f1xx.c',

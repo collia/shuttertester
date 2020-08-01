@@ -5,13 +5,13 @@
  * @date    2020-07-11
  * @brief   File contains implementation for console interface 
  *          for shutter tester
- *
  * 
  */
 #include "shuttest_terminal.h"
 #include <stdint.h>
 #include "terminal.h"
 #include "max44009.h"
+#include "shuttest.h"
 
 static uint8_t buffer[16];
 
@@ -41,12 +41,11 @@ static void SHTEST_term_parse_char(uint8_t ch) {
         break;
     case ' ':
         TERM_debug_print("Stop\r\n");
-        max44009_disable_irq();
+        st_stop();
         break;
     case '\r':
         TERM_debug_print("Start\r\n");
-        max44009_set_up_treshold();
-        max44009_enable_irq();
+        st_start();
         break;
     case 'l':
     case 'L':

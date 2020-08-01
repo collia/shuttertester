@@ -53,7 +53,7 @@
 #include "usbd_cdc.h" 
 #include "usbd_cdc_interface.h"
 
-//#include "terminal.h"
+#include "terminal.h"
 //#include "termgpio.h"
 #include "board.h"
 #include "main.h"
@@ -82,11 +82,11 @@ RING_BUFFER_DECL(UserRx, APP_RX_DATA_SIZE); /* Received Data over USB are stored
 RING_BUFFER_DECL(UserTx, APP_RX_DATA_SIZE) /* Received Data over UART (CDC
                                          * interface) are stored in this buffer 
                                          */
-uint8_t UserRxBufferFS[64];
+static uint8_t UserRxBufferFS[64];
 /* UART handler declaration */
 UART_HandleTypeDef UartHandle;
 /* TIM handler declaration */
-TIM_HandleTypeDef TimHandle;
+static TIM_HandleTypeDef TimHandle;
 /* USB handler declaration */
 extern USBD_HandleTypeDef USBD_Device;
 
@@ -100,7 +100,7 @@ static int8_t CDC_Itf_Receive(uint8_t * pbuf, uint32_t * Len);
 static void TIM_Config(void);
 static void CDC_tx_timer_init(void);
 static void CDC_tx(const uint8_t* buff, uint32_t len);
-static int CDC_rx(const uint8_t* buff, uint32_t max_len);
+static int CDC_rx(uint8_t* buff, uint32_t max_len);
 
 USBD_CDC_ItfTypeDef USBD_CDC_fops = {
   CDC_Itf_Init,
@@ -139,7 +139,7 @@ static int8_t CDC_Itf_Init(void)
   */
 static int8_t CDC_Itf_DeInit(void)
 {
-    //TERM_deinit();
+    TERM_deinit();
      return (USBD_OK);
 }
 
@@ -189,7 +189,7 @@ static int8_t CDC_Itf_Control(uint8_t cmd, uint8_t * pbuf, uint16_t length)
         break;
 
     case CDC_GET_LINE_CODING:
-        //TERM_get_config(&lineCoding);
+        TERM_get_config(&lineCoding);
         
         pbuf[0] = (uint8_t) (lineCoding.bitrate);
         pbuf[1] = (uint8_t) (lineCoding.bitrate >> 8);
@@ -222,7 +222,7 @@ static int8_t CDC_Itf_Control(uint8_t cmd, uint8_t * pbuf, uint16_t length)
   * @param  htim: TIM handle
   * @retval None
   */
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef * htim)
+void USBD_CDC_TIM_PeriodElapsedCallback(TIM_HandleTypeDef * htim)
 {
     uint8_t *buffptr;
     uint32_t buffsize = APP_TX_DATA_SIZE;
@@ -240,6 +240,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef * htim)
     }
 }
 
+void USBD_CDC_TIM_IRQHandler()
+{
+    HAL_TIM_IRQHandler(&TimHandle);
+}
 
 /**
   * @brief  CDC_Itf_DataRx
@@ -272,9 +276,12 @@ static void TIM_Config(void)
   /* Set TIMx instance */
   TimHandle.Instance = TIMx;
 
-  /* Initialize TIM3 peripheral as follows: + Period = 10000 - 1 + Prescaler =
-   * ((SystemCoreClock/2)/10000) - 1 + ClockDivision = 0 + Counter direction =
-   * Up */
+  /* Initialize TIM3 peripheral as follows: 
+    + Period = 10000 - 1 
+    + Prescaler = ((SystemCoreClock/2)/10000) - 1 
+    + ClockDivision = 0 
+    + Counter direction = Up 
+  */
   TimHandle.Init.Period = (CDC_POLLING_INTERVAL * 1000) - 1;
   TimHandle.Init.Prescaler = 84 - 1;
   TimHandle.Init.ClockDivision = 0;
@@ -316,10 +323,10 @@ static void CDC_tx(const uint8_t* buff, uint32_t len)
 }
 
 
-static int CDC_rx(const uint8_t* buff, uint32_t max_len)
+static int CDC_rx(uint8_t* buff, uint32_t max_len)
 {
     uint32_t len = max_len;
-    char *result;
+    uint8_t *result = 0;
     RING_BUFFER_GET(UserRx, result, len);
     memcpy(buff, result, len);
     return len;

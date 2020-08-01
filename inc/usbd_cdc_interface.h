@@ -51,6 +51,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_cdc.h"
+#include "stm32f1xx_hal.h"
 
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
@@ -64,6 +65,8 @@
 #define TIMx_FORCE_RESET()               __HAL_RCC_USART1_FORCE_RESET()
 #define TIMx_RELEASE_RESET()             __HAL_RCC_USART1_RELEASE_RESET()
 
+#define USBD_CDC_TIM                     TIMx
+
 /* Definition for TIMx's NVIC */
 #define TIMx_IRQn                        TIM3_IRQn
 #define TIMx_IRQHandler                  TIM3_IRQHandler
@@ -74,6 +77,8 @@
 
 extern USBD_CDC_ItfTypeDef  USBD_CDC_fops;
 
+void USBD_CDC_TIM_IRQHandler();
+void USBD_CDC_TIM_PeriodElapsedCallback(TIM_HandleTypeDef * htim);
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 #endif /* __USBD_CDC_IF_H */

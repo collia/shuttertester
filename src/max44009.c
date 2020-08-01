@@ -5,13 +5,14 @@
  * @date    2020-07-05
  * @brief   Driver for light sensor MAX 44009
  *
- * Driver works with light sensor connected by i2c 
+ * Driver works with light sensor connected by i2c
  * with address 0x94.
  * external interrup connected to a.3, but it is not used now
  */
 
-#include "max44009.h"
 #include <stdint.h>
+#include "max44009.h"
+#include "shuttest.h"
 #include "i2c.h"
 #include "stm32f1xx_hal.h"
 
@@ -40,8 +41,8 @@
 #define MAX44009_INT_GPIO_CLK_DISABLE()    __HAL_RCC_GPIOA_CLK_DISABLE()
 #define MAX44009_INT_EXTI_IRQn             EXTI0_IRQn
 
-#define MAX44009_UP_TRESHOLD     1
-#define MAX44009_DOWN_TRESHOLD   1
+#define MAX44009_UP_TRESHOLD     2
+#define MAX44009_DOWN_TRESHOLD   2
 
 static void max44009_config_gpio_int();
 /**
@@ -126,42 +127,46 @@ int16_t max44009_disable_irq() {
     return i2c_write_byte(MAX44009_ADDR, MAX44009_INTR_ENABLE, 0);
 }
 
-int16_t max44009_set_up_treshold() {
-    uint8_t current;
+int16_t max44009_clear_irq_flag() {
     int rc;
-    rc = i2c_read_byte(MAX44009_ADDR, MAX44009_LUX_HIGHT);
-    if(rc < 0)
-        return -1;
-    current = rc & 0xff;
 
-    
-    rc = i2c_write_byte(MAX44009_ADDR, MAX44009_TRESHOLD_UP,
-                        current+MAX44009_UP_TRESHOLD);
+    rc = i2c_read_byte(MAX44009_ADDR, MAX44009_INTR_STATUS);
     if(rc < 0)
         return -1;
-    rc = i2c_write_byte(MAX44009_ADDR, MAX44009_TRESHOLD_LOW, 1);
-    if(rc < 0)
-        return -1;
+
     return 0;
 }
 
-int16_t max44009_set_down_treshold() {
+int8_t max44009_set_up_treshold() {
     uint8_t current;
     int rc;
+
     rc = i2c_read_byte(MAX44009_ADDR, MAX44009_LUX_HIGHT);
     if(rc < 0)
         return -1;
     current = rc & 0xff;
 
-    
+
+    rc = i2c_write_byte(MAX44009_ADDR, MAX44009_TRESHOLD_UP,
+                        current+MAX44009_UP_TRESHOLD);
+    if(rc < 0)
+        return 0;
+
+    rc = i2c_write_byte(MAX44009_ADDR, MAX44009_TRESHOLD_LOW, 1);
+    if(rc < 0)
+        return 0;
+    return current;
+}
+
+void max44009_set_down_treshold(uint8_t value) {
+    int rc;
+
     rc = i2c_write_byte(MAX44009_ADDR, MAX44009_TRESHOLD_LOW,
-                        current-MAX44009_DOWN_TRESHOLD);
+                        value+MAX44009_DOWN_TRESHOLD);
     if(rc < 0)
-        return -1;
-    rc = i2c_write_byte(MAX44009_ADDR, MAX44009_TRESHOLD_UP, 0xee);
-    if(rc < 0)
-        return -1;
-    return 0;
+        return;
+    i2c_write_byte(MAX44009_ADDR, MAX44009_TRESHOLD_UP, 0xee);
+
 }
 
 
@@ -178,10 +183,6 @@ static void max44009_config_gpio_int() {
 
 
     gpioinitstruct.Mode = GPIO_MODE_IT_FALLING;
-
-    /* Configure interrupt pin as input with External interrupt, rising edge */
-    gpioinitstruct.Mode = GPIO_MODE_IT_RISING;
-    
     HAL_GPIO_Init(MAX44009_INT_PORT, &gpioinitstruct);
 
     /* Enable and set EXTI Interrupt to the fighest priority */

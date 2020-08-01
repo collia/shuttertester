@@ -5,7 +5,7 @@
  * @date    2020-07-07
  * @brief   File contains main munction and initialization
  *
- * 
+ *
  */
 #include <stdbool.h>
 
@@ -13,15 +13,17 @@
 #include "usbd_core.h"
 #include "stm32f1xx_hal_pcd.h"
 #include "usbd_desc.h"
-#include "usbd_cdc.h" 
+#include "usbd_cdc.h"
 #include "usbd_cdc_interface.h"
 
 #include "shuttest_terminal.h"
+#include "shuttest.h"
 #include "board.h"
 #include "max44009.h"
 #include "terminal.h"
 #include "i2c.h"
 #include "main.h"
+#include "time.h"
 
 
 USBD_HandleTypeDef USBD_Device;
@@ -33,7 +35,7 @@ void SystemClock_Config(void);
  */
 int main(void)
 {
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. 
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick.
    */
   HAL_Init();
 
@@ -46,7 +48,8 @@ int main(void)
 
   i2c_master_init();
   max44009_init();
-  
+  st_init();
+  TIME_init();
   /* Init Device Library */
   USBD_Init(&USBD_Device, &VCP_Desc, 0);
 
@@ -99,7 +102,8 @@ void SystemClock_Config(void)
   clkinitstruct.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK |
                             RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
 
-  clkinitstruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  //clkinitstruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  clkinitstruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
   clkinitstruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   clkinitstruct.APB1CLKDivider = RCC_HCLK_DIV2;
   clkinitstruct.APB2CLKDivider = RCC_HCLK_DIV1;
@@ -132,20 +136,20 @@ void Error_Handler(void)
   */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-    static bool flag = false;
     if (GPIO_Pin == MAX44009_INT_PIN)
     {
         //TERM_debug_print("irq\r\n");
-        if(flag) {
-            BRD_led_on();
-        } else {
-            BRD_led_off();
-        }
-        flag = !flag;
+        st_irq();
     }
 }
 
-
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+    if(TIME_TIM == htim->Instance) {
+        TIME_PeriodElapsedCallback(htim);
+    } else if(USBD_CDC_TIM == htim->Instance) {
+        USBD_CDC_TIM_PeriodElapsedCallback(htim);
+    }
+}
 
 #ifdef  USE_FULL_ASSERT
 
@@ -159,7 +163,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 void assert_failed(uint8_t * file, uint32_t line)
 {
   /* User can add his own implementation to report the file name and line
-   * number, ex: printf("Wrong parameters value: file %s on line %d\r\n", file, 
+   * number, ex: printf("Wrong parameters value: file %s on line %d\r\n", file,
    * line) */
 
   /* Infinite loop */
