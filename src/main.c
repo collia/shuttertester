@@ -46,10 +46,6 @@ int main(void)
   BRD_led_init();
   BRD_led_off();
 
-  i2c_master_init();
-  max44009_init();
-  st_init();
-  TIME_init();
   /* Init Device Library */
   USBD_Init(&USBD_Device, &VCP_Desc, 0);
 
@@ -61,6 +57,11 @@ int main(void)
 
   /* Start Device Process */
   USBD_Start(&USBD_Device);
+
+  i2c_master_init();
+  max44009_init();
+  st_init();
+  TIME_init();
 
   /* Infinite loop */
   while (1)
@@ -105,7 +106,7 @@ void SystemClock_Config(void)
   //clkinitstruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   clkinitstruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
   clkinitstruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  clkinitstruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  clkinitstruct.APB1CLKDivider = RCC_HCLK_DIV1;
   clkinitstruct.APB2CLKDivider = RCC_HCLK_DIV1;
   if (HAL_RCC_ClockConfig(&clkinitstruct, FLASH_LATENCY_2) != HAL_OK)
   {

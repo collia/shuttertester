@@ -36,6 +36,7 @@ void TIME_init() {
     TimHandle.Instance = TIME_TIM;
     /* Initialize TIMx peripheral for period 0.1 ms
     */
+
     TimHandle.Init.Period            = 10 - 1;
     TimHandle.Init.Prescaler         = SystemCoreClock/100000 - 1;
     TimHandle.Init.ClockDivision     = 0;
@@ -43,6 +44,14 @@ void TIME_init() {
     TimHandle.Init.RepetitionCounter = 0;
     TimHandle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
 
+    /*
+    TimHandle.Init.Period            = 1000 - 1;
+    TimHandle.Init.Prescaler         = SystemCoreClock/1000000-1;//SystemCoreClock/100000 - 1;
+    TimHandle.Init.ClockDivision     = 0;
+    TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;
+    TimHandle.Init.RepetitionCounter = 0;
+    TimHandle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    */
     if (HAL_TIM_Base_Init(&TimHandle) != HAL_OK)
     {
         /* Initialization Error */
@@ -76,7 +85,7 @@ uint64_t TIME_get() {
 void TIME_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
     if(TIME_TIM == htim->Instance) {
         time_ms++;
-        BRD_led_toggle();
+        //BRD_led_toggle();
     }
 }
 

@@ -283,7 +283,7 @@ static void TIM_Config(void)
     + Counter direction = Up 
   */
   TimHandle.Init.Period = (CDC_POLLING_INTERVAL * 1000) - 1;
-  TimHandle.Init.Prescaler = 84 - 1;
+  TimHandle.Init.Prescaler = SystemCoreClock/1000000 - 1;//84 - 1;
   TimHandle.Init.ClockDivision = 0;
   TimHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
   TimHandle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
