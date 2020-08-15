@@ -69,9 +69,9 @@ void TIME_init() {
 
 uint64_t TIME_get() {
     uint64_t time = 0;
-    //HAL_NVIC_DisableIRQ(TIM2_IRQn);
-    //time = time_ms;
-    //HAL_NVIC_EnableIRQ(TIM2_IRQn);
+    HAL_NVIC_DisableIRQ(TIM2_IRQn);
+    time = time_ms;
+    HAL_NVIC_EnableIRQ(TIM2_IRQn);
     return time;
 }
 

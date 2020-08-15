@@ -223,6 +223,7 @@ void USARTx_IRQHandler(void)
   */
 void TIM3_IRQHandler(void)
 {
+    //BRD_led_toggle();
     USBD_CDC_TIM_IRQHandler();
 }
 
@@ -253,6 +254,7 @@ void EXTI0_IRQHandler(void)
   */
 void TIM2_IRQHandler(void)
 {
+    //BRD_led_toggle();
     TIME_IRQHandler();
 }
 

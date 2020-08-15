@@ -103,8 +103,9 @@ void SystemClock_Config(void)
   clkinitstruct.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK |
                             RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
 
-  //clkinitstruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  clkinitstruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
+  clkinitstruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  // todo HSE starts unstable
+  //clkinitstruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
   clkinitstruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   clkinitstruct.APB1CLKDivider = RCC_HCLK_DIV1;
   clkinitstruct.APB2CLKDivider = RCC_HCLK_DIV1;
