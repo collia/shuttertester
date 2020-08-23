@@ -2,7 +2,7 @@
 
 import os
 env = Environment(ENV = os.environ)
- 
+
 env['AR'] = 'arm-none-eabi-ar'
 env['AS'] = 'arm-none-eabi-as'
 env['CC'] = 'arm-none-eabi-gcc'
@@ -21,15 +21,16 @@ stm_family='STM32F103XB'
 #stm_device='STM32F103X6'
 stm_device='STM32F103XB'
 
+use_max44009_sensor=False
 # include locations
 env.Append(CPPPATH = [
     '#inc',
-    '#src/parser', 
+    '#src/parser',
     '#' + stm32cubef1_hal_path + 'Inc',
     '#' + stm32cubef1_cmsis_path +'Include',
     '#' + stm32cubef1_cmsis_path +'Device/ST/STM32F1xx/Include',
     '#' + stm32cubef1_middlewears_path +'STM32_USB_Device_Library/Core/Inc',
-    '#' + stm32cubef1_middlewears_path +'STM32_USB_Device_Library/Class/CDC/Inc', 
+    '#' + stm32cubef1_middlewears_path +'STM32_USB_Device_Library/Class/CDC/Inc',
     ])
 
 env.Append(LIBPATH = [
@@ -48,6 +49,11 @@ env.Append(CCFLAGS = [
     '-DDISABLE_ECHO'
 ])
 
+if use_max44009_sensor:
+    env.Append(CCFLAGS = [
+        '-DUSE_MAX4409'
+    ])
+
 Export('env')
 
 SConscript(['src/parser/SConscript'])
@@ -62,7 +68,7 @@ env.Append(LINKFLAGS = [
     '-specs=nosys.specs',
     '-Wl,--gc-sections,-Map=main.elf.map,-cref,-u,Reset_Handler,--trace',
      '-T', 'src/gcc/linker/'+ stm_device + '_FLASH.ld'
-    ]) 
+    ])
 
 # defines
 env.Append(CPPDEFINES = [
@@ -92,13 +98,13 @@ env.Library('#lib/libstm32',
                        'build/stm32/drv/stm32f1xx_hal_rcc.c',
                        'build/stm32/drv/stm32f1xx_hal_rcc_ex.c',
                        'build/stm32/drv/stm32f1xx_hal_i2c.c',
-                       
+
                        'build/stm32/drv/stm32f1xx_ll_usb.c',
-                       
+
                        'build/stm32/usb/usbd_core.c',
                        'build/stm32/usb/usbd_ctlreq.c',
                        'build/stm32/usb/usbd_ioreq.c',
-                       
+
                        'build/stm32/usb/cdc/usbd_cdc.c',
 
                    ])
@@ -106,17 +112,10 @@ env.Library('#lib/libstm32',
 env.VariantDir('build/src/', 'src', duplicate=0)
 
 
-#print(env.Dump())
-# build everything
-prg = env.Program(
-    target = 'main',
-    LIBS=['libstm32'],
-    source = [
+local_file_list = [
         'build/src/main.c',
         'build/src/board.c',
         'build/src/time.c',
-        'build/src/i2c.c',
-        'build/src/max44009.c',
         'build/src/terminal.c',
         'build/src/shuttest.c',
         'build/src/shuttest_terminal.c',
@@ -125,10 +124,27 @@ prg = env.Program(
         'build/src/usbd_cdc_interface.c',
         'build/src/usbd_conf.c',
         'build/src/usbd_desc.c',
-        'build/src/gcc/startup_' + stm_device.lower() + '.s'
-    ]
+        'build/src/gcc/startup_' + stm_device.lower() + '.s']
+
+
+if use_max44009_sensor:
+    local_file_list.append([
+        'build/src/i2c.c',
+        'build/src/max44009.c'])
+else:
+    local_file_list.append([
+        'build/src/adc_dma.c',
+        'build/src/max44009.c'])
+#print(env.Dump())
+# build everything
+prg = env.Program(
+    target = 'main',
+    LIBS=['libstm32'],
+    source = local_file_list
 )
- 
+
+
+
 # binary file builder
 def arm_generator(source, target, env, for_signature):
     return '$OBJCOPY -O binary %s %s'%(source[0], target[0])
@@ -140,6 +156,5 @@ env.Append(BUILDERS = {
         src_suffix='.elf'
     )
 })
- 
-env.Objcopy(prg)
 
+env.Objcopy(prg)

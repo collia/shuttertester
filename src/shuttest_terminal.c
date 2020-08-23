@@ -17,8 +17,10 @@ static uint8_t buffer[16];
 
 static void SHTEST_term_parse_char(uint8_t ch);
 static void SHTEST_term_print_help();
+#ifdef USE_MAX4409
 static void SHTEST_term_print_current_light();
 static void SHTEST_term_print_max44009_regs();
+#endif
 static void SHTEST_term_print_result_table();
 static void SHTEST_term_print_exposure(uint32_t time_ms);
 void SHTEST_term_init() {
@@ -32,7 +34,6 @@ void SHTEST_term_parser() {
         SHTEST_term_parse_char(buffer[i]);
     }
 }
-
 
 static void SHTEST_term_parse_char(uint8_t ch) {
     switch(ch) {
@@ -49,12 +50,16 @@ static void SHTEST_term_parse_char(uint8_t ch) {
         TERM_debug_print("Start\r\n");
         st_start();
         break;
+#ifdef USE_MAX4409
     case 'l':
     case 'L':
         SHTEST_term_print_current_light();
         break;
+#endif
     case 'd':
+#ifdef USE_MAX4409
         SHTEST_term_print_max44009_regs();
+#endif
         break;
     default:
         TERM_debug_print("Unknown command\r\n");
@@ -67,9 +72,11 @@ static void SHTEST_term_print_help() {
     TERM_debug_print("Help:\r\n");
     TERM_debug_print("<enter>: start \r\n");
     TERM_debug_print("<space>: stop and print results \r\n");
+#ifdef USE_MAX4409
     TERM_debug_print("<l>: print current light level \r\n");
+#endif
 }
-
+#ifdef USE_MAX4409
 static void SHTEST_term_print_current_light() {
     max44009_dev_lux lux;
     TERM_debug_print("Current light: ");
@@ -99,6 +106,7 @@ static void SHTEST_term_print_max44009_regs() {
     }
 
 }
+#endif
 
 static void SHTEST_term_print_result_table() {
     const uint32_t *result;

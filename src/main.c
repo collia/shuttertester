@@ -57,9 +57,10 @@ int main(void)
 
   /* Start Device Process */
   USBD_Start(&USBD_Device);
-
+#ifdef USE_MAX4409
   i2c_master_init();
   max44009_init();
+#endif
   st_init();
   TIME_init();
 

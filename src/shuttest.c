@@ -17,6 +17,8 @@
 #include "board.h"
 #include "time.h"
 
+#ifdef USE_MAX4409
+
 static bool st_mode_wait_hight_level = true;
 static uint8_t low_value = 0;
 
@@ -34,6 +36,7 @@ void st_start() {
     low_value = max44009_set_up_treshold();
     max44009_enable_irq();
 }
+
 uint32_t st_stop() {
     uint32_t result = test_index;
     max44009_disable_irq();
@@ -63,3 +66,21 @@ void st_irq() {
         st_mode_wait_hight_level = true;
     }
 }
+
+#else
+void st_init() {
+}
+
+void st_start() {
+}
+
+uint32_t st_stop() {
+    return 0;
+}
+
+uint32_t st_get_result(const uint32_t **result) {
+    return 0;
+}
+void st_irq() {
+}
+#endif
