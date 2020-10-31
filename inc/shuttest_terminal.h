@@ -11,3 +11,4 @@
 
 void SHTEST_term_init();
 void SHTEST_term_parser();
+void SHTEST_term_check_result();

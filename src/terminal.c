@@ -78,11 +78,7 @@ int TERM_get_input_buf(unsigned char* buf, int max_size)
     while(!TERM_inited);
 
     int rc;
-    do
-    {
-        rc = low_rx_handler(buf, max_size);
-    }
-    while(rc == 0);
+    rc = low_rx_handler(buf, max_size);
     return rc;
 }
 

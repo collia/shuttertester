@@ -24,7 +24,7 @@
 #include "i2c.h"
 #include "main.h"
 #include "time.h"
-
+#include "adc_dma.h"
 
 USBD_HandleTypeDef USBD_Device;
 
@@ -60,6 +60,8 @@ int main(void)
 #ifdef USE_MAX4409
   i2c_master_init();
   max44009_init();
+#else
+  adc_dma_init();
 #endif
   st_init();
   TIME_init();
@@ -68,8 +70,7 @@ int main(void)
   while (1)
   {
       SHTEST_term_parser();
-      //TERM_debug_print("I'm alive\r\n");
-      //HAL_Delay(10000);
+      SHTEST_term_check_result();
   }
 }
 
@@ -139,14 +140,16 @@ void Error_Handler(void)
   */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
+#ifdef USE_MAX4409
     if (GPIO_Pin == MAX44009_INT_PIN)
     {
         //TERM_debug_print("irq\r\n");
         st_irq();
     }
+#endif
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     if(TIME_TIM == htim->Instance) {
         TIME_PeriodElapsedCallback(htim);
     } else if(USBD_CDC_TIM == htim->Instance) {

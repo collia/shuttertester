@@ -9,6 +9,7 @@
  */
 #include "shuttest_terminal.h"
 #include <stdint.h>
+#include <stdbool.h>
 #include "terminal.h"
 #include "max44009.h"
 #include "shuttest.h"
@@ -23,6 +24,7 @@ static void SHTEST_term_print_max44009_regs();
 #endif
 static void SHTEST_term_print_result_table();
 static void SHTEST_term_print_exposure(uint32_t time_ms);
+
 void SHTEST_term_init() {
 }
 
@@ -33,6 +35,10 @@ void SHTEST_term_parser() {
     for(i =0; i < rc; i++) {
         SHTEST_term_parse_char(buffer[i]);
     }
+}
+
+void SHTEST_term_check_result() {
+    st_process();
 }
 
 static void SHTEST_term_parse_char(uint8_t ch) {
@@ -59,6 +65,8 @@ static void SHTEST_term_parse_char(uint8_t ch) {
     case 'd':
 #ifdef USE_MAX4409
         SHTEST_term_print_max44009_regs();
+#else
+        SHTEST_term_print_adc_buffer();
 #endif
         break;
     default:
@@ -107,7 +115,6 @@ static void SHTEST_term_print_max44009_regs() {
 
 }
 #endif
-
 static void SHTEST_term_print_result_table() {
     const uint32_t *result;
     const uint32_t test_number = st_get_result(&result);
@@ -174,3 +181,20 @@ static void SHTEST_term_print_exposure(uint32_t time) {
     TERM_debug_print_int(error_percents%100);
     TERM_debug_print("%");
 }
+
+#ifndef USE_MAX4409
+void SHTEST_term_print_adc_buffer() {
+    //const uint32_t* data = (uint32_t*)st_get_debug_data();
+    const uint32_t* data = (uint32_t*)st_get_debug_data();
+    //TERM_debug_print_int(data);
+    TERM_debug_print("\r\n\r\n");
+    //for (int i = 0; i < 4*20; i++) {
+    for (int i = 0; i < 20*4; i++) {
+        TERM_debug_print_int(data[i]);
+        TERM_debug_print(" ");
+        if(i != 0 && (i+1) % 16 == 0) {
+            TERM_debug_print("\r\n");
+        }
+    }
+}
+#endif

@@ -98,6 +98,8 @@ env.Library('#lib/libstm32',
                        'build/stm32/drv/stm32f1xx_hal_rcc.c',
                        'build/stm32/drv/stm32f1xx_hal_rcc_ex.c',
                        'build/stm32/drv/stm32f1xx_hal_i2c.c',
+                       'build/stm32/drv/stm32f1xx_hal_adc.c',
+                       'build/stm32/drv/stm32f1xx_hal_adc_ex.c',
 
                        'build/stm32/drv/stm32f1xx_ll_usb.c',
 
@@ -106,7 +108,6 @@ env.Library('#lib/libstm32',
                        'build/stm32/usb/usbd_ioreq.c',
 
                        'build/stm32/usb/cdc/usbd_cdc.c',
-
                    ])
 
 env.VariantDir('build/src/', 'src', duplicate=0)
@@ -133,8 +134,7 @@ if use_max44009_sensor:
         'build/src/max44009.c'])
 else:
     local_file_list.append([
-        'build/src/adc_dma.c',
-        'build/src/max44009.c'])
+        'build/src/adc_dma.c'])
 #print(env.Dump())
 # build everything
 prg = env.Program(

@@ -57,6 +57,7 @@
 #include "stm32f1xx_it.h"
 #include "max44009.h"
 #include "time.h"
+#include "adc_dma.h"
 
 /** @addtogroup Validation_Project
   * @{
@@ -257,6 +258,27 @@ void TIM2_IRQHandler(void)
     //BRD_led_toggle();
     TIME_IRQHandler();
 }
+
+/**
+  * @brief  This function handles ADC interrupt request.
+  * @param  None
+  * @retval None
+  */
+void ADC1_2_IRQHandler(void)
+{
+    adc_dma_adc_irq();
+}
+
+/**
+* @brief  This function handles DMA interrupt request.
+* @param  None
+* @retval None
+*/
+void DMA1_Channel1_IRQHandler(void)
+{
+    adc_dma_dma_irq();
+}
+  
 
 /**
   * @}

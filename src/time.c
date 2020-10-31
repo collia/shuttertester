@@ -18,9 +18,10 @@
 
 static uint64_t time_ms;
 static TIM_HandleTypeDef  TimHandle;
+static TIM_OC_InitTypeDef sConfig;
 
 void TIME_init() {
-
+    
     __HAL_RCC_TIM2_CLK_ENABLE();
 
     /* ##- Configure the NVIC for TIMx ######################################## */
@@ -44,17 +45,22 @@ void TIME_init() {
     TimHandle.Init.RepetitionCounter = 0;
     TimHandle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
 
-    /*
+/*    
     TimHandle.Init.Period            = 1000 - 1;
-    TimHandle.Init.Prescaler         = SystemCoreClock/1000000-1;//SystemCoreClock/100000 - 1;
+    TimHandle.Init.Prescaler         = SystemCoreClock/100000-1;
     TimHandle.Init.ClockDivision     = 0;
     TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;
     TimHandle.Init.RepetitionCounter = 0;
     TimHandle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-    */
+*/   
     if (HAL_TIM_Base_Init(&TimHandle) != HAL_OK)
     {
         /* Initialization Error */
+        Error_Handler();
+    }
+    if (HAL_TIM_Base_Start(&TimHandle) != HAL_OK)
+    {
+        /* Counter Enable Error */
         Error_Handler();
     }
 
@@ -65,6 +71,29 @@ void TIME_init() {
         /* Starting Error */
         Error_Handler();
     }
+
+    /*##-2- Configure the output channels ######################################*/
+    /* Common configuration for all channels */
+    sConfig.OCMode       = TIM_OCMODE_TOGGLE;
+    sConfig.OCPolarity   = TIM_OCPOLARITY_HIGH;
+    sConfig.OCNPolarity  = TIM_OCNPOLARITY_HIGH;
+    sConfig.OCIdleState  = TIM_OCIDLESTATE_SET;
+    sConfig.OCNIdleState = TIM_OCNIDLESTATE_SET;
+    sConfig.OCFastMode   = TIM_OCFAST_DISABLE;
+  
+    /* Set the pulse value for channel 2 */
+    sConfig.Pulse = 0;
+    if(HAL_TIM_OC_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_2) != HAL_OK)
+    {
+        /* Configuration Error */
+        Error_Handler();
+    }
+    if(HAL_TIM_OC_Start(&TimHandle, TIM_CHANNEL_2) != HAL_OK)
+    {
+        /* Starting Error */
+        Error_Handler();
+    }
+
 }
 
 uint64_t TIME_get() {
