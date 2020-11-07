@@ -1,8 +1,8 @@
 include <threads.scad>
 
 x = 70;
-y = 62;
-z = 25;
+y = 60;
+z = 23;
 
 rounding = 3;
 
@@ -13,23 +13,23 @@ module box() {
     }
 }
 
-board_x = 32;
-board_y = 55;
-board_z = 3;
+board_x = 50;
+board_y = 58;
+board_z = 5;
 
-board_1_width = 17;
-board_1_length = 55;
-board_1_heigth = 17;
-usb_x = 0;
-usb_y = -board_1_length/2;
-usb_z = (board_1_width/2 - 3);
+board_1_width = 35;
+board_1_length = 59;
+board_1_heigth = 15;
+usb_x = 5;
+usb_y = board_1_length/2;
+usb_z = (board_1_heigth/2 - 5.5);
 
-usb_w = 6;
-usb_h = 3;
-usb_l = 8;
+usb_w = 9;
+usb_h = 2;
+usb_l = 12;
 hole_d = 3.5;
-hole_x_offset = 12;
-hole_y_offset = 25;
+hole_x_offset = (39+3)/2;
+hole_y_offset = (47+3)/2;
 
 module plate() {
     translate([0,0,-board_z/2])
@@ -40,39 +40,34 @@ module plate() {
                 cube([usb_w, usb_l, usb_h] , center=true);
             translate([0,0,(board_1_heigth+board_z)/2])
                 cube([board_x, board_y, board_z], center=true);
-        }/*
-        translate([hole_x_offset, hole_y_offset, board_z/2])
-            cylinder(d=hole_d, h=board_1_heigth+board_z, center=true);
-        translate([hole_x_offset, -hole_y_offset, board_z/2])
-            cylinder(d=hole_d, h=board_1_heigth+board_z, center=true);
-        translate([-hole_x_offset, hole_y_offset, board_z/2])
-            cylinder(d=hole_d, h=board_1_heigth+board_z, center=true);
-        translate([-hole_x_offset, -hole_y_offset, board_z/2])
-            cylinder(d=hole_d, h=board_1_heigth+board_z, center=true);*/
+        }
+        translate([0, board_1_length/2-3, -(board_1_heigth/2-3)])
+            cube([board_1_width, 6, 6], center=true);
+        translate([0, -(board_1_length/2-3), -(board_1_heigth/2-3)])
+            cube([board_1_width, 6, 6], center=true);
     }
 }
 
 cup_border = 4;
-cup_heigth = 4;
+cup_heigth = 2;
 module cup() {
     translate([0, 0, z/2])
         union() {
-            translate([0,0, -cup_heigth/4])
-                cube([board_x + cup_border, board_y+cup_border, cup_heigth/2], center=true);
             translate([0,0, -cup_heigth/2])
-                cube([board_x + cup_border/2, board_y+cup_border/2, cup_heigth/2], center=true);
+                cube([board_x + cup_border/2, board_y+cup_border/2, cup_heigth], center=true);
         }
 }
 
 module nut_hole_3(h) {
     d = 3;
     union() {
-        cylinder(d=d, h=h, center=true);
-        translate([0,0,h/2])
+        cylinder(d=d-0.2, h=h, center=true);
+        translate([0,0,h/2-d/2]) {
             cylinder(d1=d, d2=2*d, h=d, center=true);
-        //translate([0,0,-h/2])
-            //metric_thread (diameter=d, pitch=0.5, length=h, internal=true, n_starts=1);
-
+        }
+        translate([0,0,-h/2]) {
+            metric_thread (diameter=d, pitch=0.5, length=h, internal=true, n_starts=1);
+        }
     }
 }
 module nuts() {
@@ -109,4 +104,4 @@ module cup_print() {
 }
 
 body_print();
-cup_print();
+//cup_print();
