@@ -3,9 +3,9 @@
  * @author  Nikolay
  * @license MIT
  * @date    2020-07-11
- * @brief   File contains implementation for console interface 
+ * @brief   File contains implementation for console interface
  *          for shutter tester
- * 
+ *
  */
 #include "shuttest_terminal.h"
 #include <stdint.h>
@@ -24,6 +24,9 @@ static void SHTEST_term_print_max44009_regs();
 #endif
 static void SHTEST_term_print_result_table();
 static void SHTEST_term_print_exposure(uint32_t time_ms);
+#ifndef USE_MAX4409
+static void SHTEST_term_print_adc_buffer();
+#endif
 
 void SHTEST_term_init() {
 }
@@ -117,16 +120,23 @@ static void SHTEST_term_print_max44009_regs() {
 #endif
 static void SHTEST_term_print_result_table() {
     const uint32_t *result;
-    const uint32_t test_number = st_get_result(&result);
+    uint32_t test_number;
 
-    for(int i = 0; i < test_number; i++) {
-        TERM_debug_print_int(result[i]/10);
-        TERM_debug_print(".");
-        TERM_debug_print_int(result[i]%10);
-        TERM_debug_print("ms :");
-
-        SHTEST_term_print_exposure(result[i]);
+    for(int channel = 0; channel < ST_ADC_CHANNELS_NUMBER; channel++) {
+        test_number = st_get_result(&result, channel);
+        TERM_debug_print("Channel ");
+        TERM_debug_print_int(channel);
         TERM_debug_print("\r\n");
+
+        for(int i = 0; i < test_number; i++) {
+            TERM_debug_print_int(result[i]/10);
+            TERM_debug_print(".");
+            TERM_debug_print_int(result[i]%10);
+            TERM_debug_print("ms :");
+
+            SHTEST_term_print_exposure(result[i]);
+            TERM_debug_print("\r\n");
+        }
     }
 }
 static void SHTEST_term_print_exposure(uint32_t time) {
@@ -145,7 +155,7 @@ static void SHTEST_term_print_exposure(uint32_t time) {
         TERM_debug_print_int(s);
         TERM_debug_print("s ");
     } else if (time != 0) {
-        /* 1/2 1/4 1/8 1/15 1/30 1/60 1/125 1/250 1/500 1/1000 
+        /* 1/2 1/4 1/8 1/15 1/30 1/60 1/125 1/250 1/500 1/1000
           500  250 125  64   32  16    8      4     2    1
         */
         uint32_t fraction=0;
@@ -183,14 +193,14 @@ static void SHTEST_term_print_exposure(uint32_t time) {
 }
 
 #ifndef USE_MAX4409
-void SHTEST_term_print_adc_buffer() {
+static void SHTEST_term_print_adc_buffer() {
     //const uint32_t* data = (uint32_t*)st_get_debug_data();
-    const uint32_t* data = (uint32_t*)st_get_debug_data();
+    const uint16_t* data = (const uint16_t*)st_get_debug_data();
     //TERM_debug_print_int(data);
     TERM_debug_print("\r\n\r\n");
     //for (int i = 0; i < 4*20; i++) {
     for (int i = 0; i < 20*4; i++) {
-        TERM_debug_print_int(data[i]);
+        TERM_debug_print_int((int)data[i]);
         TERM_debug_print(" ");
         if(i != 0 && (i+1) % 16 == 0) {
             TERM_debug_print("\r\n");

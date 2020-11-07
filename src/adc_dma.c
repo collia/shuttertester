@@ -3,7 +3,7 @@
  * @author  Nikolay
  * @license MIT
  * @date    2020-08-23
- * @brief   File conteins API for initialization and usage 
+ * @brief   File conteins API for initialization and usage
  *          ADC with DMA data transfer
  *
  * Used Timer3 for adc control
@@ -38,7 +38,6 @@ void adc_dma_init() {
         /* Calibration Error */
         Error_Handler();
     }
-
 }
 
 void adc_dma_start(uint16_t* data1, uint16_t* data2, uint32_t data_len) {
@@ -65,7 +64,7 @@ void adc_dma_stop() {
     }
 }
 
- 
+
 /**
   * @brief  Conversion complete callback in non blocking mode
   * @param  AdcHandle : AdcHandle handle
@@ -130,11 +129,11 @@ static void adc_init() {
     AdcHandle.Init.DataAlign             = ADC_DATAALIGN_RIGHT;
     AdcHandle.Init.ScanConvMode          = ADC_SCAN_ENABLE;
     AdcHandle.Init.ContinuousConvMode    = DISABLE;
-    AdcHandle.Init.NbrOfConversion       = 1;
+    AdcHandle.Init.NbrOfConversion       = 2; // support two channels
     AdcHandle.Init.DiscontinuousConvMode = DISABLE;
     AdcHandle.Init.NbrOfDiscConversion   = 1;
 
-    AdcHandle.Init.ExternalTrigConv      = ADC_EXTERNALTRIGCONV_T2_CC2; 
+    AdcHandle.Init.ExternalTrigConv      = ADC_EXTERNALTRIGCONV_T2_CC2;
     if (HAL_ADC_Init(&AdcHandle) != HAL_OK)
     {
         /* ADC initialization error */
@@ -144,12 +143,21 @@ static void adc_init() {
     sConfig.Channel      = ADC_CHANNEL_4;
     sConfig.Rank         = ADC_REGULAR_RANK_1;
     sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
-  
+
     if (HAL_ADC_ConfigChannel(&AdcHandle, &sConfig) != HAL_OK)
     {
         /* Channel Configuration Error */
         Error_Handler();
-  }
+    }
+    sConfig.Channel      = ADC_CHANNEL_5;
+    sConfig.Rank         = ADC_REGULAR_RANK_2;
+    sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+
+    if (HAL_ADC_ConfigChannel(&AdcHandle, &sConfig) != HAL_OK)
+    {
+        /* Channel Configuration Error */
+        Error_Handler();
+    }
 
 
 }
@@ -178,7 +186,7 @@ static void adc_dma_hal_init(ADC_HandleTypeDef *hadc) {
 
     /* Configure DMA parameters */
     DmaHandle.Instance = DMA1_Channel1;
-  
+
     DmaHandle.Init.Direction           = DMA_PERIPH_TO_MEMORY;
     DmaHandle.Init.PeriphInc           = DMA_PINC_DISABLE;
     DmaHandle.Init.MemInc              = DMA_MINC_ENABLE;
